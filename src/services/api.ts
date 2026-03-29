@@ -196,6 +196,9 @@ export const api = {
       ci_run_number?: string;
       ci_run_id?: string;
       ci_run_url?: string;
+      version?: string;
+      git_commit?: string;
+      build_time?: string;
     }>('/v1/health'),
 
   // Sync batch (for drainQueue)

@@ -13,6 +13,9 @@ export default function SystemHealthScreen() {
   const mqttConnected = kv.getBool('mqtt_connected');
   const [ciRunNumber, setCiRunNumber] = useState<string | null>(null);
   const [ciRunUrl, setCiRunUrl] = useState<string | null>(null);
+  const [gitVersion, setGitVersion] = useState<string | null>(null);
+  const [gitCommit, setGitCommit] = useState<string | null>(null);
+  const [buildTime, setBuildTime] = useState<string | null>(null);
   const [healthLoading, setHealthLoading] = useState(true);
 
   useEffect(() => {
@@ -26,6 +29,12 @@ export default function SystemHealthScreen() {
         const u = r.data.ci_run_url?.trim();
         setCiRunNumber(n && n.length > 0 ? n : null);
         setCiRunUrl(u && u.length > 0 ? u : null);
+        const v = r.data.version?.trim();
+        const c = r.data.git_commit?.trim();
+        const t = r.data.build_time?.trim();
+        setGitVersion(v && v.length > 0 ? v : null);
+        setGitCommit(c && c.length > 0 ? c : null);
+        setBuildTime(t && t.length > 0 ? t : null);
       }
     })();
     return () => {
@@ -43,6 +52,21 @@ export default function SystemHealthScreen() {
         <Text style={[ss.badge, { color: mqttConnected ? theme.success : theme.warn }]}>
           MQTT: {mqttConnected ? 'Connected' : 'Disconnected'}
         </Text>
+        {!healthLoading && (gitVersion != null || gitCommit != null) && (
+          <Text style={[ss.ciLine, { color: theme.textSecondary }]}>
+            Backend{' '}
+            {gitVersion != null ? <Text style={{ color: theme.text }}>{gitVersion}</Text> : null}
+            {gitCommit != null ? (
+              <Text style={{ color: theme.textSecondary }}>
+                {' '}
+                ({gitCommit.length > 14 ? `${gitCommit.slice(0, 14)}…` : gitCommit})
+              </Text>
+            ) : null}
+            {buildTime != null ? (
+              <Text style={{ color: theme.textSecondary }}>{`\nBuilt ${buildTime}`}</Text>
+            ) : null}
+          </Text>
+        )}
         {!healthLoading && ciRunNumber != null && (
           <Text style={[ss.ciLine, { color: theme.textSecondary }]}>
             CI/CD run #{ciRunNumber}
