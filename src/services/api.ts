@@ -54,7 +54,6 @@ async function apiFetch<T>(
   let token = await getAccessToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
@@ -104,7 +103,6 @@ async function refreshAccessToken(): Promise<string | null> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify({ refresh_token: refresh }),
     });

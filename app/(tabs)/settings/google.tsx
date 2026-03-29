@@ -24,7 +24,7 @@ export default function SettingsGoogleScreen() {
     haptic.light();
     Alert.alert(
       'Sign in with Google',
-      "You'll open your browser to sign in. After you sign in, if you see a \"Visit Site\" or ngrok page, tap it once—then you'll return to the app.",
+      "You'll open your browser to sign in. If you see an interstitial or warning page, continue once—then you'll return to the app.",
       [
         { text: 'Cancel', style: 'cancel' },
         {

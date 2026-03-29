@@ -18,7 +18,7 @@ const GOOGLE_CLIENT_ID =
   kv.getString('google_client_id') ||
   '';
 
-/** If set, use this as redirect URI (e.g. https://your-ngrok.ngrok-free.app/oauth/google/callback). Google requires a valid TLD; auth.expo.io is often rejected. */
+/** If set, use this as redirect URI (e.g. https://api.yourdomain.com/oauth/google/callback). Google requires a valid HTTPS URL; auth.expo.io is often rejected. */
 const CUSTOM_REDIRECT_URI =
   process.env.EXPO_PUBLIC_GOOGLE_REDIRECT_URI?.trim() || '';
 
@@ -233,7 +233,6 @@ async function exchangeAndStore(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify({
         code,
