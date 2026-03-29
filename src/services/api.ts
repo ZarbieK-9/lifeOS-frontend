@@ -188,7 +188,15 @@ export const api = {
   isAuthenticated: async () => !!(await getAccessToken()),
 
   // Health
-  health: () => apiFetch<{ status: string; db: string; mqtt: string }>('/v1/health'),
+  health: () =>
+    apiFetch<{
+      status: string;
+      db: string;
+      mqtt: string;
+      ci_run_number?: string;
+      ci_run_id?: string;
+      ci_run_url?: string;
+    }>('/v1/health'),
 
   // Sync batch (for drainQueue)
   syncBatch: (

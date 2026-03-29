@@ -1,15 +1,37 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Activity, KeyRound } from 'lucide-react-native';
 import { RowCard, ScreenContainer } from '@/src/components/layout';
 import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { kv } from '@/src/db/mmkv';
+import { api } from '@/src/services/api';
 
 export default function SystemHealthScreen() {
   const { theme } = useAppTheme();
   const router = useRouter();
   const mqttConnected = kv.getBool('mqtt_connected');
+  const [ciRunNumber, setCiRunNumber] = useState<string | null>(null);
+  const [ciRunUrl, setCiRunUrl] = useState<string | null>(null);
+  const [healthLoading, setHealthLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const r = await api.health();
+      if (cancelled) return;
+      setHealthLoading(false);
+      if (r.ok) {
+        const n = r.data.ci_run_number?.trim();
+        const u = r.data.ci_run_url?.trim();
+        setCiRunNumber(n && n.length > 0 ? n : null);
+        setCiRunUrl(u && u.length > 0 ? u : null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <ScreenContainer scroll>
@@ -21,6 +43,22 @@ export default function SystemHealthScreen() {
         <Text style={[ss.badge, { color: mqttConnected ? theme.success : theme.warn }]}>
           MQTT: {mqttConnected ? 'Connected' : 'Disconnected'}
         </Text>
+        {!healthLoading && ciRunNumber != null && (
+          <Text style={[ss.ciLine, { color: theme.textSecondary }]}>
+            CI/CD run #{ciRunNumber}
+            {ciRunUrl ? (
+              <Text style={{ color: theme.primary }} onPress={() => Linking.openURL(ciRunUrl!)}>
+                {' '}
+                (open in GitHub)
+              </Text>
+            ) : null}
+          </Text>
+        )}
+        {!healthLoading && ciRunNumber == null && api.isConfigured() && (
+          <Text style={[ss.ciLine, { color: theme.textSecondary }]}>
+            CI/CD run: not set (deploy from GitHub Actions to record)
+          </Text>
+        )}
       </View>
       <RowCard
         title="Latency diagnostics"
@@ -45,5 +83,6 @@ const ss = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700' },
   sub: { fontSize: 14, lineHeight: 20 },
   badge: { fontSize: 13, fontWeight: '600' },
+  ciLine: { fontSize: 13, lineHeight: 20, marginTop: 4 },
 });
 
